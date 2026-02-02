@@ -1,0 +1,53 @@
+[project]
+name = "otel-microservice-lab"
+version = "0.1.0"
+description = "Production-style FastAPI microservice with full local observability stack."
+requires-python = ">=3.11"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "OpenAI" }]
+dependencies = [
+  "fastapi>=0.111.0",
+  "uvicorn[standard]>=0.30.0",
+  "sqlalchemy>=2.0.30",
+  "psycopg[binary]>=3.1.18",
+  "redis>=5.0.4",
+  "celery>=5.4.0",
+  "prometheus-client>=0.20.0",
+  "python-json-logger>=2.0.7",
+  "pydantic>=2.7.1",
+  "pydantic-settings>=2.2.1",
+  "opentelemetry-sdk>=1.25.0",
+  "opentelemetry-exporter-otlp>=1.25.0",
+  "opentelemetry-instrumentation-fastapi>=0.46b0",
+  "opentelemetry-instrumentation-psycopg>=0.46b0",
+  "opentelemetry-instrumentation-redis>=0.46b0",
+  "opentelemetry-instrumentation-celery>=0.46b0",
+  "opentelemetry-instrumentation-logging>=0.46b0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.2.0",
+  "pytest-asyncio>=0.23.7",
+  "httpx>=0.27.0",
+  "fakeredis>=2.23.2",
+  "ruff>=0.4.8",
+  "mypy>=1.10.0",
+]
+
+[tool.ruff]
+line-length = 100
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+strict = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+addopts = "-ra"
