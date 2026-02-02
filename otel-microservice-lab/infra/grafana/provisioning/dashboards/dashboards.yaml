@@ -1,0 +1,11 @@
+apiVersion: 1
+
+dashboards:
+  - name: otel-lab
+    orgId: 1
+    folder: "Otel Lab"
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /var/lib/grafana/dashboards
