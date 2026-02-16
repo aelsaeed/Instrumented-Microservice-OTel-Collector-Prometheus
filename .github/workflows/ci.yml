@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r otel-microservice-lab/requirements-dev.txt
+
+      - name: Ruff
+        run: ruff check otel-microservice-lab
+
+      - name: MyPy
+        run: PYTHONPATH=otel-microservice-lab mypy --config-file otel-microservice-lab/pyproject.toml otel-microservice-lab/tests
+
+      - name: Pytest
+        run: PYTHONPATH=otel-microservice-lab pytest otel-microservice-lab/tests
+
+      - name: Validate docker compose config
+        run: docker compose -f otel-microservice-lab/infra/docker-compose.yml config

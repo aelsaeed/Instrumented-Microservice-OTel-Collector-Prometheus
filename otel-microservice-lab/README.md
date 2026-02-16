@@ -5,23 +5,9 @@ A production-style FastAPI microservice with PostgreSQL persistence, Redis cachi
 ## Quickstart
 
 ```bash
-cd otel-microservice-lab
+cd ..
 make up
-```
-
-Open the service:
-
-- API: http://localhost:8000
-- Health: http://localhost:8000/health
-- Metrics: http://localhost:8000/metrics
-- Jaeger: http://localhost:16686
-- Prometheus: http://localhost:9090
-- Grafana: http://localhost:3000 (anonymous access enabled)
-
-Run a load test (requires k6 installed):
-
-```bash
-make loadtest
+make demo
 ```
 
 ## Architecture
@@ -48,25 +34,25 @@ FastAPI + Worker -> OTEL Collector -> Jaeger (traces)
 
 1. The app and worker emit traces, metrics, and logs via OTLP to the OpenTelemetry Collector.
 2. The Collector exports traces to Jaeger and metrics to Prometheus.
-3. Grafana reads Prometheus (metrics) and Jaeger (traces) to render dashboards.
+3. Grafana reads Prometheus (metrics) to render pre-provisioned dashboards.
 
 ## Dashboards
 
-Grafana dashboards are pre-provisioned:
+Grafana dashboard includes:
 
-- Service latency (p95)
+- Request latency (p50/p95)
 - Error rate (5xx)
-- DB query time
+- DB query time (p95)
 - Cache hit rate
 - Worker queue depth
 
-Example screenshot paths (store your captures here):
+## Endpoint behavior for traces
 
-```
-./docs/screenshots/grafana-latency.png
-./docs/screenshots/grafana-cache-hit-rate.png
-./docs/screenshots/jaeger-trace.png
-```
+Use these endpoints to generate traces quickly:
+
+- `POST /items` (DB insert + task enqueue)
+- `GET /items/{id}` (cache miss/hit + DB lookup)
+- `GET /health` (baseline service span)
 
 ## Local Development
 
@@ -95,9 +81,9 @@ scripts/        # Load test scripts
 ## Troubleshooting
 
 - **Ports already in use**: stop local services or change ports in `infra/docker-compose.yml`.
-- **Missing spans in Jaeger**: ensure `otel-collector` is running and the app has `OTEL_LAB_OTEL_EXPORTER_OTLP_ENDPOINT` set.
-- **Prometheus shows no metrics**: verify `app:8000/metrics` is reachable and the Prometheus config targets `app:8000`.
-- **Grafana dashboard empty**: ensure Prometheus datasource is healthy and the load test is generating traffic.
+- **Missing spans in Jaeger**: ensure `otel-collector` is running and run `make demo` traffic.
+- **Prometheus shows no metrics**: verify `app:8000/metrics` is reachable from Prometheus.
+- **Grafana dashboard empty**: ensure Prometheus datasource is healthy and traffic is being generated.
 
 ## API Reference
 

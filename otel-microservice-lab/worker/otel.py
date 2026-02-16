@@ -7,14 +7,19 @@ from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExport
 from opentelemetry.instrumentation.celery import CeleryInstrumentor
 from opentelemetry.instrumentation.logging import LoggingInstrumentor
 from opentelemetry.instrumentation.psycopg import PsycopgInstrumentor
-from opentelemetry.sdk.logs import LoggerProvider
-from opentelemetry.sdk.logs.export import BatchLogRecordProcessor
+
+try:
+    from opentelemetry.sdk.logs import LoggerProvider
+    from opentelemetry.sdk.logs.export import BatchLogRecordProcessor
+except ModuleNotFoundError:  # pragma: no cover - compatibility with older SDK layout
+    from opentelemetry.sdk._logs import LoggerProvider
+    from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
+from opentelemetry._logs import set_logger_provider
 from opentelemetry.sdk.metrics import MeterProvider
 from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry._logs import set_logger_provider
 
 from app.config import settings
 
