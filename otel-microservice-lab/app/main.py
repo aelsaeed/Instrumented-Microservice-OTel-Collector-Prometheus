@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import uuid
 
-from fastapi import Depends, FastAPI, HTTPException, Request, Response
+from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import PlainTextResponse
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
@@ -15,8 +15,8 @@ from app.config import settings
 from app.db import Base, engine, get_session
 from app.metrics import CACHE_HITS, CACHE_MISSES, DB_QUERY_LATENCY, QUEUE_DEPTH, track_request
 from app.models import Item
-from app.schemas import ItemCreate, ItemRead
 from app.otel import configure_otel, instrument_app
+from app.schemas import ItemCreate, ItemRead
 from worker.client import enqueue_enrichment
 
 logger = logging.getLogger("otel_lab")
@@ -95,13 +95,12 @@ async def health() -> dict[str, str]:
 @app.post("/items", response_model=ItemRead)
 async def create_item(payload: ItemCreate) -> ItemRead:
     def _create() -> Item:
-        with get_session() as session:
-            with DB_QUERY_LATENCY.labels(operation="insert").time():
-                item = Item(name=payload.name, description=payload.description)
-                session.add(item)
-                session.flush()
-                session.refresh(item)
-                return item
+        with get_session() as session, DB_QUERY_LATENCY.labels(operation="insert").time():
+            item = Item(name=payload.name, description=payload.description)
+            session.add(item)
+            session.flush()
+            session.refresh(item)
+            return item
 
     item = await run_in_threadpool(_create)
     enqueue_enrichment(str(item.id))
